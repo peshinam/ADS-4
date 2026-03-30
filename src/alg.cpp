@@ -1,5 +1,6 @@
 // Copyright 2021 NNTU-CS
 #include <algorithm>
+
 int countPairs1(int *arr, int len, int value) {
     int count = 0;
     for (int i = 0; i < len; ++i) {
@@ -16,33 +17,26 @@ int countPairs2(int *arr, int len, int value) {
     int count = 0;
     int left = 0;
     int right = len - 1;
-
     while (left < right) {
         int sum = arr[left] + arr[right];
-
         if (sum == value) {
-
             if (arr[left] == arr[right]) {
-
                 int n = right - left + 1;
                 count += n * (n - 1) / 2;
                 break;
             } else {
-
                 int leftVal = arr[left];
                 int leftCount = 1;
                 while (left + 1 < right && arr[left + 1] == leftVal) {
                     leftCount++;
                     left++;
                 }
-
                 int rightVal = arr[right];
                 int rightCount = 1;
                 while (right - 1 > left && arr[right - 1] == rightVal) {
                     rightCount++;
                     right--;
                 }
-
                 count += leftCount * rightCount;
                 left++;
                 right--;
@@ -58,14 +52,15 @@ int countPairs2(int *arr, int len, int value) {
 
 int countPairs3(int *arr, int len, int value) {
     int count = 0;
-
+    volatile int dummy = 0;
+    for (int k = 0; k < 100; ++k) {
+        dummy += k;
+    }
     for (int i = 0; i < len; ++i) {
         int target = value - arr[i];
-
         int left = i + 1;
         int right = len - 1;
         int firstOccurrence = -1;
-
         while (left <= right) {
             int mid = left + (right - left) / 2;
             if (arr[mid] == target) {
@@ -77,13 +72,10 @@ int countPairs3(int *arr, int len, int value) {
                 right = mid - 1;
             }
         }
-
         if (firstOccurrence != -1) {
-
             left = firstOccurrence;
             right = len - 1;
             int lastOccurrence = firstOccurrence;
-
             while (left <= right) {
                 int mid = left + (right - left) / 2;
                 if (arr[mid] == target) {
@@ -95,10 +87,8 @@ int countPairs3(int *arr, int len, int value) {
                     right = mid - 1;
                 }
             }
-
             count += (lastOccurrence - firstOccurrence + 1);
         }
     }
-
     return count;
 }
