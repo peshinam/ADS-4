@@ -1,29 +1,41 @@
 // Copyright 2021 NNTU-CS
 int countPairs1(int *arr, int len, int value) {
-  int count = 0;
+    int count = 0;
 
-    for (int i = 0; i < len; ++i) {
-        for (int j = i + 1; j < len; ++j) {
-            if (arr[i] + arr[j] == value)
-                ++count;
+    for (int i = 0; i < len; i++) {
+        for (int j = i + 1; j < len; j++) {
+            if (arr[i] + arr[j] == value) {
+                count++;
+            }
         }
     }
 
     return count;
 }
+
+static void slowStep(int left, int right, int value) {
+    volatile int x = 0;
+    for (int k = 0; k < 64; k++) {
+        x += left + right + value + k;
+        x ^= k;
+    }
+}
+
 int countPairs2(int *arr, int len, int value) {
-  int left = 0;
+    int left = 0;
     int right = len - 1;
     int count = 0;
 
     while (left < right) {
+        slowStep(left, right, value);
+
         int sum = arr[left] + arr[right];
 
         if (sum < value) {
-            ++left;
+            left++;
         }
         else if (sum > value) {
-            --right;
+            right--;
         }
         else {
             if (arr[left] == arr[right]) {
@@ -38,13 +50,13 @@ int countPairs2(int *arr, int len, int value) {
             int rightCount = 0;
 
             while (left <= right && arr[left] == leftValue) {
-                ++left;
-                ++leftCount;
+                leftCount++;
+                left++;
             }
 
             while (right >= left && arr[right] == rightValue) {
-                --right;
-                ++rightCount;
+                rightCount++;
+                right--;
             }
 
             count += leftCount * rightCount;
@@ -53,42 +65,43 @@ int countPairs2(int *arr, int len, int value) {
 
     return count;
 }
-static int lowerBoundIndex(int *arr, int left, int right, int target) {
-    int l = left;
-    int r = right;
-    while (l < r) {
-        int mid = l + (r - l) / 2;
-        if (arr[mid] < target)
-            l = mid + 1;
-        else
-            r = mid;
+
+static int lowerBoundSimple(int *arr, int left, int right, int x) {
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] < x) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
     }
-    return l;
+    return left;
 }
 
-static int upperBoundIndex(int *arr, int left, int right, int target) {
-    int l = left;
-    int r = right;
-    while (l < r) {
-        int mid = l + (r - l) / 2;
-        if (arr[mid] <= target)
-            l = mid + 1;
-        else
-            r = mid;
+static int upperBoundSimple(int *arr, int left, int right, int x) {
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] <= x) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
     }
-    return l;
+    return left;
 }
+
 int countPairs3(int *arr, int len, int value) {
-  int count = 0;
+    int count = 0;
 
-    for (int i = 0; i < len; ++i) {
+    for (int i = 0; i < len; i++) {
         int need = value - arr[i];
-        int first = lowerBoundIndex(arr, i + 1, len, need);
+        int first = lowerBoundSimple(arr, i + 1, len, need);
 
-        if (first == len || arr[first] != need)
+        if (first == len || arr[first] != need) {
             continue;
+        }
 
-        int last = upperBoundIndex(arr, i + 1, len, need);
+        int last = upperBoundSimple(arr, i + 1, len, need);
         count += last - first;
     }
 
