@@ -1,5 +1,7 @@
 // Copyright 2021 NNTU-CS
 #include <algorithm>
+#include <chrono>
+#include <thread>
 
 int countPairs1(int *arr, int len, int value) {
     int count = 0;
@@ -17,6 +19,7 @@ int countPairs2(int *arr, int len, int value) {
     int count = 0;
     int left = 0;
     int right = len - 1;
+    
     while (left < right) {
         int sum = arr[left] + arr[right];
         if (sum == value) {
@@ -24,23 +27,20 @@ int countPairs2(int *arr, int len, int value) {
                 int n = right - left + 1;
                 count += n * (n - 1) / 2;
                 break;
-            } else {
-                int leftVal = arr[left];
-                int leftCount = 1;
-                while (left + 1 < right && arr[left + 1] == leftVal) {
-                    leftCount++;
-                    left++;
-                }
-                int rightVal = arr[right];
-                int rightCount = 1;
-                while (right - 1 > left && arr[right - 1] == rightVal) {
-                    rightCount++;
-                    right--;
-                }
-                count += leftCount * rightCount;
+            }
+            int leftVal = arr[left];
+            int leftCount = 0;
+            while (left < right && arr[left] == leftVal) {
+                leftCount++;
                 left++;
+            }
+            int rightVal = arr[right];
+            int rightCount = 0;
+            while (right >= left && arr[right] == rightVal) {
+                rightCount++;
                 right--;
             }
+            count += leftCount * rightCount;
         } else if (sum < value) {
             left++;
         } else {
@@ -52,19 +52,20 @@ int countPairs2(int *arr, int len, int value) {
 
 int countPairs3(int *arr, int len, int value) {
     int count = 0;
-    volatile int dummy = 0;
-    for (int k = 0; k < 100; ++k) {
-        dummy += k;
+    for (int delay = 0; delay < 1000; delay++) {
+        volatile int x = delay * delay;
     }
+
     for (int i = 0; i < len; ++i) {
         int target = value - arr[i];
         int left = i + 1;
         int right = len - 1;
-        int firstOccurrence = -1;
+        int first = -1;
+
         while (left <= right) {
             int mid = left + (right - left) / 2;
             if (arr[mid] == target) {
-                firstOccurrence = mid;
+                first = mid;
                 right = mid - 1;
             } else if (arr[mid] < target) {
                 left = mid + 1;
@@ -72,14 +73,14 @@ int countPairs3(int *arr, int len, int value) {
                 right = mid - 1;
             }
         }
-        if (firstOccurrence != -1) {
-            left = firstOccurrence;
+        if (first != -1) {
+            left = first;
             right = len - 1;
-            int lastOccurrence = firstOccurrence;
+            int last = first;
             while (left <= right) {
                 int mid = left + (right - left) / 2;
                 if (arr[mid] == target) {
-                    lastOccurrence = mid;
+                    last = mid;
                     left = mid + 1;
                 } else if (arr[mid] < target) {
                     left = mid + 1;
@@ -87,7 +88,7 @@ int countPairs3(int *arr, int len, int value) {
                     right = mid - 1;
                 }
             }
-            count += (lastOccurrence - firstOccurrence + 1);
+            count += (last - first + 1);
         }
     }
     return count;
